@@ -26,7 +26,7 @@ Une fois installé, votre script est prêt à être utilisé via l'interface de 
 ### Installation :
 1. Clonez le dépôt ou téléchargez le fichier `.deb` si disponible :
     ```bash
-    git clone https://github.com/votre_repo/toolbox.git
+    git clone https://github.com/Lasertie/ToolBox.git
     cd toolbox
     ```
 2. Installez **ToolBox** :
