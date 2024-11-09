@@ -23,15 +23,15 @@ Une fois installé, votre script est prêt à être utilisé via l'interface de 
 - **Fiabilité** : Pas besoin d'une connexion Internet pour que cela fonctionne. **ToolBox** est toujours accessible, même hors ligne.
 - **Personnalisation** : Créez vos propres scripts ou téléchargez ceux des autres et adaptez-les à vos besoins.
 
-### Installation :
-1. Clonez le dépôt ou téléchargez le fichier `.deb` si disponible :
+### Installation deb :
+1. Téléchargez le fichier `.deb` :
     ```bash
     git clone https://github.com/Lasertie/ToolBox.git
     cd toolbox
     ```
 2. Installez **ToolBox** :
     ```bash
-    sudo dpkg -i toolbox.deb
+    sudo dpkg -i ToolBox.deb
     ```
 
 ---
