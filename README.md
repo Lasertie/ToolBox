@@ -29,11 +29,21 @@ Une fois installé, votre script est prêt à être utilisé via l'interface de 
     git clone https://github.com/Lasertie/ToolBox.git
     cd toolbox
     ```
-2. Installez **ToolBox** :
+2. Installez **Toosudo dpkg-deb --build ToolBox/lBox** :
     ```bash
     sudo dpkg -i ToolBox.deb
     ```
 
+### Build
+
+1. Clonez le repo
+    ```bash
+    git clone https://github.com/Lasertie/ToolBox.git
+    ```
+2. ```bash
+    
+    ```
+    
 ---
 
 ## EN

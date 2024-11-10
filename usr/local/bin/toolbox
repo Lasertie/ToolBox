@@ -19,7 +19,8 @@ def main():
     args = parser.parse_args()
     module_name = args.module
     module_args = args.args
-    options = {"file": args.file, "path": args.path}
+    
+    options = {key: value for key, value in vars(args).items() if key not in ["module", "args"] and value is not None}
 
     try:
         # Tenter de charger le module
