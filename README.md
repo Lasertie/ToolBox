@@ -1,5 +1,4 @@
 ![Toolbox](white_Logo.png)
-# ToolBox
 [FR](#fr) | [EN](#en)
 
 ## FR
