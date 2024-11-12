@@ -15,11 +15,12 @@ def main():
     # Options globales pour tous les modules
     parser.add_argument("-f", "--file", help="Nom du fichier de sortie pour certains modules.")
     parser.add_argument("-p", "--path", help="Chemin du dossier de sortie pour certains modules.")
+    parser.add_argument("-t", "--transphorm", help="")
 
     args = parser.parse_args()
     module_name = args.module
     module_args = args.args
-    
+
     options = {key: value for key, value in vars(args).items() if key not in ["module", "args"] and value is not None}
 
     try:
