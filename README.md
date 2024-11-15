@@ -26,8 +26,9 @@ Une fois installé, votre script est prêt à être utilisé via l'interface de 
 ### Installation deb :
 1. Téléchargez le fichier `.deb` :
     1. Aller dans Realeases -->
-    2. Télécharger le dernier fichier la dernière en da
-2. Installez **ToolBox** :
+    2. Prenez la dernière en date.
+    3. Télécharger le fichier correspondant a votre OS
+2. Installez **ToolBox** (Linux):
     ```bash
     sudo dpkg -i ToolBox.deb
     ```
@@ -39,7 +40,7 @@ Une fois installé, votre script est prêt à être utilisé via l'interface de 
     git clone https://github.com/Lasertie/ToolBox.git
     ```
 2. ```bash
-    
+    ./build.bash 
     ```
     
 ---
