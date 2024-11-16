@@ -5,45 +5,52 @@ import importlib
 import argparse
 
 # Ajoute le chemin du répertoire contenant 'modules' au sys.path
-sys.path.append(os.path.join(os.path.dirname(__file__), 'modules'))
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'modules'))
 
 def main():
     parser = argparse.ArgumentParser(description="Outil CLI pour exécuter des modules de manière modulaire.")
-    parser.add_argument("module", help="Nom du module à exécuter.")
+    parser.add_argument("module", help="Nom du module à exécuter (doit être dans 'modules').")
     parser.add_argument("args", nargs="*", help="Arguments positionnels pour le module.")
-    
+    parser.add_argument("-m", "--module-help", action="store_true", help="Afficher l'aide pour le module spécifié.")
+
     # Options globales pour tous les modules
     parser.add_argument("-f", "--file", help="Nom du fichier de sortie pour certains modules.")
     parser.add_argument("-p", "--path", help="Chemin du dossier de sortie pour certains modules.")
-    parser.add_argument("-t", "--transphorm", help="")
 
     args = parser.parse_args()
     module_name = args.module
     module_args = args.args
-
-    options = {key: value for key, value in vars(args).items() if key not in ["module", "args"] and value is not None}
+    options = {key: value for key, value in vars(args).items() if key not in ["module", "args", "module_help"] and value is not None}
 
     try:
         # Tenter de charger le module
         module = importlib.import_module(module_name)
 
+        # Afficher l'aide si --module-help est utilisé
+        if args.module_help:
+            if module.__doc__:
+                print(f"Aide pour le module '{module_name}':\n{module.__doc__}")
+            else:
+                print(f"Le module '{module_name}' n'a pas de documentation disponible.")
+            return
+
         # Vérifier si la fonction 'run' existe dans le module
         if hasattr(module, 'run'):
             run_func = module.run
-            
-            # Exécuter la fonction avec les arguments et options
             result = run_func(*module_args, **options)
             if result is not None:
                 print(result)
         else:
             print(f"Le module '{module_name}' ne contient pas de fonction 'run'.")
             if module.__doc__:
-                print(f"Aide pour le module '{module_name}' : {module.__doc__}")
+                print(f"Aide pour le module '{module_name}' :\n{module.__doc__}")
+            else:
+                print("Aucune documentation trouvée pour ce module.")
     except ImportError as e:
         print(f"Erreur d'importation : {e}")
-        print(f"Module '{module_name}' introuvable.")
+        print(f"Module '{module_name}' introuvable dans le répertoire 'modules'.")
     except Exception as e:
-        print(f"Erreur lors de l'exécution du module '{module_name}': {e}")
+        print(f"Erreur lors de l'exécution du module '{module_name}' : {type(e).__name__} - {e}")
 
 if __name__ == "__main__":
     main()
