@@ -223,7 +223,7 @@ Les fichiers de configuration se trouvent dans :
 
 ## Licence
 
-Ce projet est sous licence [LOC](loc.zyglonk.fr)
+Ce projet est sous licence [LOC](https://loc.zyglonk.fr)
 
 ## Support
 
