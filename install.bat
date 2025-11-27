@@ -190,8 +190,8 @@ call :print_success "Installation terminée!"
 echo.
 echo Utilisation:
 echo   toolbox list                                    # Lister les modules
-echo   toolbox run image-converter --help              # Aide pour un module
-echo   toolbox run image-converter --input image.jpg --format png
+echo   toolbox imgconv --help              # Aide pour un module
+echo   toolbox imgconv --input image.jpg --format png
 echo.
 
 pause
