@@ -1,4 +1,6 @@
 __pycache__
-build
-modules/__pycache__
-venv
+build/
+modules/__pycache__/
+venv/
+__pycache__/imgconv.cpython-312.pyc
+__pycache__/

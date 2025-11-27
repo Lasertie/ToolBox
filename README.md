@@ -1,3 +1,5 @@
+![Toolbox](Logo/white_Logo.png)
+
 # Toolbox - Gestionnaire de modules Python
 
 ## Description
