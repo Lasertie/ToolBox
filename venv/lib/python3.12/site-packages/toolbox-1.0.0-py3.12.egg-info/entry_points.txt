@@ -1,3 +1,0 @@
-[console_scripts]
-mcli = toolbox:main
-toolbox = toolbox:main
