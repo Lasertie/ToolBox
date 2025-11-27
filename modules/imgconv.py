@@ -9,7 +9,7 @@ import sys
 from pathlib import Path
 
 # Métadonnées du module
-VERSION = "1.0.0"
+VERSION = "2.0.0"
 DESCRIPTION = "Convertit les images entre différents formats"
 AUTHOR = "Toolbox"
 
