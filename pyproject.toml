@@ -1,0 +1,53 @@
+# pyproject.toml - Configuration moderne Python
+[build-system]
+requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "toolbox"
+version = "1.0.0"
+description = "Application CLI modulaire pour scripts Python"
+readme = "README.md"
+requires-python = ">=3.7"
+license = {text = "MIT"}
+authors = [
+    {name = "Lasertie", email = "zyglonk@proton.me"},
+]
+keywords = ["cli", "modular", "python", "scripts", "automation"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
+dependencies = [
+    "Pillow>=8.0.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=6.0", "black", "flake8"]
+image = ["Pillow>=8.0.0"]
+pdf = ["PyPDF2>=2.0.0"]
+video = ["moviepy>=1.0.0"]
+
+[project.scripts]
+toolbox = "toolbox:main"
+mcli = "toolbox:main"
+
+[project.urls]
+Homepage = "https://github.com/username/toolbox"
+Repository = "https://github.com/username/toolbox"
+Issues = "https://github.com/username/toolbox/issues"
+
+[tool.black]
+line-length = 88
+target-version = ['py37']
+
+[tool.flake8]
+max-line-length = 88
+extend-ignore = ["E203", "W503"]

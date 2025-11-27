@@ -1,0 +1,4 @@
+# requirements.txt - Dépendances principales
+Pillow>=8.0.0
+argparse
+
