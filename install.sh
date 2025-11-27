@@ -108,7 +108,7 @@ install_app() {
     print_status "Installation de Toolbox..."
     
     # Si nous sommes dans le répertoire source
-    if [ -f "setup.py" ]; then
+    if [ -f "install.py" ]; then
         $PIP_CMD install -e .
     else
         # Installation depuis PyPI (quand disponible)

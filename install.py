@@ -166,7 +166,7 @@ def install_toolbox():
     except PermissionError:
         print("Erreur: Permissions insuffisantes")
         if platform.system().lower() != "windows":
-            print("Essayez avec: sudo python3 setup.py")
+            print("Essayez avec: sudo python3 install.py")
         else:
             print("Exécutez en tant qu'administrateur")
         return False

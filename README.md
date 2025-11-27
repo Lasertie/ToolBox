@@ -28,12 +28,12 @@ Toolbox est une application en ligne de commande modulaire qui permet d'exécute
 
 **Linux/macOS :**
 ```bash
-sudo python3 setup.py
+sudo python3 install.py
 ```
 
 **Windows (en tant qu'administrateur) :**
 ```cmd
-python setup.py
+python install.py
 ```
 
 ### Installation manuelle
@@ -166,7 +166,7 @@ toolbox imgconv --info image.jpg
 ```
 toolbox/
 ├── toolbox.py              # Application principale
-├── setup.py               # Script d'installation
+├── install.py               # Script d'installation
 ├── README.md              # Cette documentation
 ├── requirements.txt       # Dépendances Python
 └── modules/               # Modules d'exemple
@@ -177,10 +177,10 @@ toolbox/
 
 ```bash
 # Linux/macOS
-sudo python3 setup.py uninstall
+sudo python3 install.py uninstall
 
 # Windows (en tant qu'administrateur)
-python setup.py uninstall
+python install.py uninstall
 ```
 
 ## Développement

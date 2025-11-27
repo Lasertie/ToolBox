@@ -107,7 +107,7 @@ REM Installation de l'application
 :install_app
 call :print_status "Installation de Modular CLI..."
 
-if exist "setup.py" (
+if exist "install.py" (
     %PIP_CMD% install -e .
 ) else (
     %PIP_CMD% install toolbox
