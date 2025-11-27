@@ -55,7 +55,7 @@ python setup.py
 toolbox list
 
 # Exécuter un module
-toolbox run <nom_module> [arguments]
+toolbox <nom_module> [arguments]
 
 # Installer un nouveau module
 toolbox install chemin/vers/module.py
@@ -68,13 +68,13 @@ toolbox uninstall nom_module
 
 ```bash
 # Convertir une image JPG en PNG
-toolbox run image_converter photo.jpg photo.png
+toolbox run imgconv photo.jpg photo.png
 
 # Convertir avec qualité spécifique
-toolbox run image_converter photo.jpg photo.webp --quality 80
+toolbox run imgconv photo.jpg photo.webp --quality 80
 
 # Voir les informations d'une image
-toolbox run image_converter --info photo.jpg
+toolbox run imgconv --info photo.jpg
 ```
 
 ## Création de modules
@@ -138,7 +138,7 @@ if __name__ == "__main__":
 
 ## Modules inclus
 
-### image_converter
+### imgconv
 
 Convertit les images entre différents formats (JPG, PNG, WEBP, BMP).
 
@@ -150,13 +150,13 @@ pip install Pillow
 **Usage :**
 ```bash
 # Conversion simple
-toolbox run image_converter input.jpg output.png
+toolbox run imgconv input.jpg output.png
 
 # Avec qualité personnalisée
-toolbox run image_converter input.jpg output.webp --quality 85
+toolbox run imgconv input.jpg output.webp --quality 85
 
 # Informations sur une image
-toolbox run image_converter --info image.jpg
+toolbox run imgconv --info image.jpg
 ```
 
 ## Structure des fichiers
@@ -168,7 +168,7 @@ toolbox/
 ├── README.md              # Cette documentation
 ├── requirements.txt       # Dépendances Python
 └── modules/               # Modules d'exemple
-    └── image_converter.py # Convertisseur d'images
+    └── imgconv.py # Convertisseur d'images
 ```
 
 ## Désinstallation
@@ -240,7 +240,7 @@ Pour obtenir de l'aide :
 # Aucune dépendance obligatoire pour le core
 
 # Dépendances optionnelles pour les modules d'exemple
-Pillow>=8.0.0          # Pour image_converter
+Pillow>=8.0.0          # Pour imgconv
 requests>=2.25.0       # Pour les modules web
 beautifulsoup4>=4.9.0  # Pour le parsing HTML
 PyPDF2>=2.0.0         # Pour la manipulation PDF
