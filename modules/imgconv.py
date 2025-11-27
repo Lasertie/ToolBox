@@ -1,216 +1,170 @@
 #!/usr/bin/env python3
 """
-Module de conversion d'images
-Convertit des images d'un format à un autre (JPG, PNG, WEBP, etc.)
+Module de conversion d'images pour Toolbox
+Convertit les images entre différents formats (JPG, PNG, WEBP, HEIC, etc.)
 """
 
-import os
+import argparse
+import sys
 from pathlib import Path
-from PIL import Image
-import logging
 
-# Informations du module (requis)
-MODULE_INFO = {
-    'name': 'image-converter',
-    'version': '1.0.0',
-    'description': 'Convertit des images d\'un format à un autre',
-    'author': 'Assistant',
-    'arguments': [
-        {
-            'name': '--input',
-            'help': 'Fichier image d\'entrée ou dossier',
-            'required': True,
-            'type': str
-        },
-        {
-            'name': '--output',
-            'help': 'Fichier de sortie ou dossier de destination',
-            'required': False,
-            'type': str,
-            'default': None
-        },
-        {
-            'name': '--format',
-            'help': 'Format de sortie (jpg, png, webp, bmp, etc.)',
-            'required': True,
-            'type': str
-        },
-        {
-            'name': '--quality',
-            'help': 'Qualité pour JPEG (1-100)',
-            'required': False,
-            'type': int,
-            'default': 95
-        },
-        {
-            'name': '--recursive',
-            'help': 'Traiter récursivement les sous-dossiers',
-            'required': False,
-            'type': bool,
-            'default': False
-        }
-    ]
-}
+# Métadonnées du module
+VERSION = "1.0.0"
+DESCRIPTION = "Convertit les images entre différents formats"
+AUTHOR = "Toolbox"
 
-# Extensions supportées
-SUPPORTED_FORMATS = {
-    'jpg': 'JPEG',
-    'jpeg': 'JPEG',
-    'png': 'PNG',
-    'webp': 'WebP',
-    'bmp': 'BMP',
-    'tiff': 'TIFF',
-    'gif': 'GIF'
-}
+def convert_image(input_path: str, output_path: str, quality: int = 95):
+    """
+    Convertit une image d'un format à un autre
 
-def setup_logging():
-    """Configuration du logging pour le module"""
-    logger = logging.getLogger('image-converter')
-    if not logger.handlers:
-        handler = logging.StreamHandler()
-        formatter = logging.Formatter('%(levelname)s - %(message)s')
-        handler.setFormatter(formatter)
-        logger.addHandler(handler)
-        logger.setLevel(logging.INFO)
-    return logger
-
-def convert_image(input_path: Path, output_path: Path, format_name: str, quality: int = 95) -> bool:
-    """Convertit une image individuelle"""
-    logger = setup_logging()
-    
-    try:
-        # Ouvrir l'image
-        with Image.open(input_path) as img:
-            # Conversion pour certains formats
-            if format_name.upper() == 'JPEG' and img.mode in ('RGBA', 'LA', 'P'):
-                # JPEG ne supporte pas la transparence
-                background = Image.new('RGB', img.size, (255, 255, 255))
-                if img.mode == 'P':
-                    img = img.convert('RGBA')
-                background.paste(img, mask=img.split()[-1] if img.mode == 'RGBA' else None)
-                img = background
-            
-            # Sauvegarder avec les paramètres appropriés
-            save_kwargs = {}
-            if format_name.upper() == 'JPEG':
-                save_kwargs['quality'] = quality
-                save_kwargs['optimize'] = True
-            elif format_name.upper() == 'PNG':
-                save_kwargs['optimize'] = True
-            elif format_name.upper() == 'WEBP':
-                save_kwargs['quality'] = quality
-                save_kwargs['method'] = 6
-            
-            img.save(output_path, format=format_name.upper(), **save_kwargs)
-            
-        logger.info(f"✓ {input_path.name} → {output_path.name}")
-        return True
-        
-    except Exception as e:
-        logger.error(f"✗ Erreur lors de la conversion de {input_path.name}: {e}")
-        return False
-
-def get_output_path(input_path: Path, output_arg: str, new_format: str) -> Path:
-    """Détermine le chemin de sortie basé sur les arguments"""
-    if output_arg is None:
-        # Même nom, nouveau format
-        return input_path.with_suffix(f'.{new_format.lower()}')
-    
-    output_path = Path(output_arg)
-    
-    if output_path.is_dir() or (not output_path.exists() and not output_path.suffix):
-        # Dossier de destination
-        output_path.mkdir(parents=True, exist_ok=True)
-        return output_path / f"{input_path.stem}.{new_format.lower()}"
-    else:
-        # Fichier spécifique
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-        return output_path
-
-def find_images(path: Path, recursive: bool = False) -> list:
-    """Trouve tous les fichiers images dans un chemin"""
-    image_extensions = {'.jpg', '.jpeg', '.png', '.webp', '.bmp', '.tiff', '.gif'}
-    images = []
-    
-    if path.is_file():
-        if path.suffix.lower() in image_extensions:
-            images.append(path)
-    elif path.is_dir():
-        pattern = "**/*" if recursive else "*"
-        for file_path in path.glob(pattern):
-            if file_path.is_file() and file_path.suffix.lower() in image_extensions:
-                images.append(file_path)
-    
-    return images
-
-def execute(args: dict) -> bool:
-    """Fonction principale d'exécution du module (requis)"""
-    logger = setup_logging()
-    
-    # Validation des arguments
-    input_path = Path(args['input'])
-    output_arg = args.get('output')
-    target_format = args['format'].lower()
-    quality = args.get('quality', 95)
-    recursive = args.get('recursive', False)
-    
-    # Vérifier le format de sortie
-    if target_format not in SUPPORTED_FORMATS:
-        logger.error(f"Format non supporté: {target_format}")
-        logger.info(f"Formats supportés: {', '.join(SUPPORTED_FORMATS.keys())}")
-        return False
-    
-    # Vérifier l'entrée
-    if not input_path.exists():
-        logger.error(f"Le fichier ou dossier d'entrée n'existe pas: {input_path}")
-        return False
-    
-    # Vérifier Pillow
+    Args:
+        input_path: Chemin de l'image source
+        output_path: Chemin de l'image de destination
+        quality: Qualité de compression (pour JPEG et WEBP)
+    """
     try:
         from PIL import Image
+        from pillow_heif import register_heif_opener
+        register_heif_opener()  # Enregistre le gestionnaire HEIF
     except ImportError:
-        logger.error("La bibliothèque Pillow (PIL) n'est pas installée.")
-        logger.info("Installez-la avec: pip install Pillow")
+        print("Erreur: Le module Pillow ou pillow-heif n'est pas installé.")
+        print("Installez-le avec: pip install Pillow pillow-heif")
         return False
-    
-    # Trouver les images à traiter
-    images = find_images(input_path, recursive)
-    
-    if not images:
-        logger.warning("Aucune image trouvée à traiter")
-        return True
-    
-    logger.info(f"Conversion de {len(images)} image(s) vers le format {target_format.upper()}")
-    
-    # Traiter chaque image
-    success_count = 0
-    format_name = SUPPORTED_FORMATS[target_format]
-    
-    for image_path in images:
-        try:
-            output_path = get_output_path(image_path, output_arg, target_format)
-            
-            if convert_image(image_path, output_path, format_name, quality):
-                success_count += 1
-                
-        except Exception as e:
-            logger.error(f"Erreur lors du traitement de {image_path}: {e}")
-    
-    # Résumé
-    logger.info(f"Conversion terminée: {success_count}/{len(images)} images converties")
-    
-    return success_count == len(images)
 
-# Test du module si exécuté directement
+    try:
+        # Ouvre l'image source
+        with Image.open(input_path) as img:
+            # Détermine le format de sortie basé sur l'extension
+            output_format = Path(output_path).suffix.lower()
+
+            # Gère les cas spéciaux pour différents formats
+            if output_format in ['.jpg', '.jpeg']:
+                if img.mode in ('RGBA', 'LA', 'P'):
+                    background = Image.new('RGB', img.size, (255, 255, 255))
+                    if img.mode == 'P':
+                        img = img.convert('RGBA')
+                    background.paste(img, mask=img.split()[-1] if 'A' in img.mode else None)
+                    img = background
+                img.save(output_path, format='JPEG', quality=quality, optimize=True)
+
+            elif output_format == '.png':
+                img.save(output_path, format='PNG', optimize=True)
+
+            elif output_format == '.webp':
+                img.save(output_path, format='WEBP', quality=quality, optimize=True)
+
+            elif output_format == '.bmp':
+                if img.mode in ('RGBA', 'LA', 'P'):
+                    img = img.convert('RGB')
+                img.save(output_path, format='BMP')
+
+            elif output_format == '.heic':
+                img.save(output_path, format='HEIC', quality=quality, optimize=True)
+
+            else:
+                img.save(output_path)
+
+        return True
+
+    except Exception as e:
+        print(f"Erreur lors de la conversion: {e}")
+        return False
+
+def get_image_info(image_path: str):
+    """Affiche les informations d'une image"""
+    try:
+        from PIL import Image
+        from pillow_heif import register_heif_opener
+        register_heif_opener()  # Enregistre le gestionnaire HEIF
+    except ImportError:
+        print("Erreur: Le module Pillow ou pillow-heif n'est pas installé.")
+        return False
+
+    try:
+        with Image.open(image_path) as img:
+            print(f"Fichier: {image_path}")
+            print(f"Format: {img.format}")
+            print(f"Mode: {img.mode}")
+            print(f"Taille: {img.size[0]}x{img.size[1]} pixels")
+
+            # Taille du fichier
+            file_size = Path(image_path).stat().st_size
+            if file_size < 1024:
+                print(f"Taille du fichier: {file_size} bytes")
+            elif file_size < 1024 * 1024:
+                print(f"Taille du fichier: {file_size / 1024:.1f} KB")
+            else:
+                print(f"Taille du fichier: {file_size / (1024 * 1024):.1f} MB")
+
+        return True
+
+    except Exception as e:
+        print(f"Erreur lors de la lecture de l'image: {e}")
+        return False
+
+def main(args):
+    """Point d'entrée principal du module"""
+    parser = argparse.ArgumentParser(
+        description="Convertisseur d'images",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Exemples:
+  toolbox run image_converter input.jpg output.png
+  toolbox run image_converter photo.png photo.webp --quality 80
+  toolbox run image_converter --info photo.jpg
+        """
+    )
+
+    parser.add_argument('input', nargs='?', help='Fichier image source')
+    parser.add_argument('output', nargs='?', help='Fichier image de destination')
+    parser.add_argument('--quality', '-q', type=int, default=95,
+                        help='Qualité de compression (1-100, défaut: 95)')
+    parser.add_argument('--info', '-i', action='store_true',
+                        help='Affiche les informations de l\'image')
+
+    # Parse les arguments
+    parsed_args = parser.parse_args(args)
+
+    # Mode information
+    if parsed_args.info:
+        if not parsed_args.input:
+            print("Erreur: Spécifiez un fichier image avec --info")
+            return 1
+
+        if not Path(parsed_args.input).exists():
+            print(f"Erreur: Le fichier '{parsed_args.input}' n'existe pas")
+            return 1
+
+        success = get_image_info(parsed_args.input)
+        return 0 if success else 1
+
+    # Mode conversion
+    if not parsed_args.input or not parsed_args.output:
+        print("Erreur: Spécifiez les fichiers d'entrée et de sortie")
+        parser.print_help()
+        return 1
+
+    # Vérifie que le fichier source existe
+    if not Path(parsed_args.input).exists():
+        print(f"Erreur: Le fichier '{parsed_args.input}' n'existe pas")
+        return 1
+
+    # Vérifie la qualité
+    if not 1 <= parsed_args.quality <= 100:
+        print("Erreur: La qualité doit être entre 1 et 100")
+        return 1
+
+    # Effectue la conversion
+    print(f"Conversion de '{parsed_args.input}' vers '{parsed_args.output}'...")
+    success = convert_image(parsed_args.input, parsed_args.output, parsed_args.quality)
+
+    if success:
+        print("Conversion réussie!")
+        return 0
+    else:
+        return 1
+
+# Test direct du module
 if __name__ == "__main__":
-    # Test basique
-    test_args = {
-        'input': 'test.jpg',
-        'format': 'png',
-        'quality': 95,
-        'recursive': False
-    }
-    
-    print("Test du module de conversion d'images...")
-    result = execute(test_args)
-    print(f"Résultat: {'Succès' if result else 'Échec'}")
+    import sys
+    sys.exit(main(sys.argv[1:]))
