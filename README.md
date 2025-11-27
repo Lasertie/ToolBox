@@ -138,11 +138,11 @@ if __name__ == "__main__":
 4. **Dépendances** : Vérifiez la présence des modules requis et affichez des messages clairs
 5. **Tests** : Permettez l'exécution directe du module pour les tests
 
-## Modules inclus
+## Modules de base
 
 ### imgconv
 
-Convertit les images entre différents formats (JPG, PNG, WEBP, BMP).
+Convertit les images entre différents formats (JPG, PNG, WEBP, BMP, HEIC).
 
 **Dépendances :**
 ```bash
@@ -152,13 +152,13 @@ pip install Pillow
 **Usage :**
 ```bash
 # Conversion simple
-toolbox run imgconv input.jpg output.png
+toolbox imgconv input.jpg output.png
 
 # Avec qualité personnalisée
-toolbox run imgconv input.jpg output.webp --quality 85
+toolbox imgconv input.jpg output.webp --quality 85
 
 # Informations sur une image
-toolbox run imgconv --info image.jpg
+toolbox imgconv --info image.jpg
 ```
 
 ## Structure des fichiers

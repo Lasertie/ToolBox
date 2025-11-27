@@ -3,7 +3,7 @@
 
 set -e
 
-echo "=== Installation de Modular CLI ==="
+echo "=== Installation de Toolbox ==="
 
 # Couleurs pour l'affichage
 RED='\033[0;31m'
@@ -83,7 +83,7 @@ setup_venv() {
         fi
         
         # Activer l'environnement virtuel
-        source venv/bin/activate
+        source ./venv/bin/activate
         PIP_CMD="pip"
         
         print_success "Environnement virtuel activé"
@@ -105,7 +105,7 @@ install_dependencies() {
 
 # Installation de l'application
 install_app() {
-    print_status "Installation de Modular CLI..."
+    print_status "Installation de Toolbox..."
     
     # Si nous sommes dans le répertoire source
     if [ -f "setup.py" ]; then
@@ -115,7 +115,7 @@ install_app() {
         $PIP_CMD install toolbox
     fi
     
-    print_success "Modular CLI installé"
+    print_success "Toolbox installé"
 }
 
 # Créer le répertoire des modules

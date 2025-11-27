@@ -19,25 +19,37 @@ def get_install_paths():
         program_files = Path(os.environ.get('PROGRAMFILES', 'C:/Program Files'))
         install_dir = program_files / "Toolbox"
         bin_dir = install_dir
+        modules_install_dir = install_dir
         
         # Dossier dans PATH pour Windows
         user_scripts = Path(os.environ.get('APPDATA', '')) / "Python" / "Scripts"
         if not user_scripts.exists():
             user_scripts = Path.home() / "AppData" / "Roaming" / "Python" / "Scripts"
         
-        return install_dir, user_scripts
+        return install_dir, user_scripts, modules_install_dir
     
     elif system == "darwin":
         # macOS  
         install_dir = Path("/usr/local/lib/toolbox")
         bin_dir = Path("/usr/local/bin")
-        return install_dir, bin_dir
+        modules_install_dir = install_dir
+        return install_dir, bin_dir, modules_install_dir
     
     else:
         # Linux et autres Unix
         install_dir = Path("/opt/toolbox")
         bin_dir = Path("/usr/local/bin")
-        return install_dir, bin_dir
+
+        # Avoir le répertoire de l'utilisateur alors qu'il est en root. 
+        try:
+            username = os.environ['SUDO_USER']
+            print("Bonjour", username) # C'est toujours simpa
+        except KeyError:
+            print("Il y a un problème, veuillez signaler le problème en créent un issue le repo Git")
+        home_dir = Path("/home") / username
+        modules_install_dir = home_dir / ".toolbox"
+        print(modules_install_dir)
+        return install_dir, bin_dir, modules_install_dir
 
 def create_launcher_script(install_dir: Path, bin_dir: Path):
     """Crée le script de lancement"""
@@ -92,9 +104,10 @@ def install_toolbox():
     print(f"Python {sys.version} détecté ✓")
     
     # Détermine les chemins
-    install_dir, bin_dir = get_install_paths()
+    install_dir, bin_dir, modules_install_dir = get_install_paths()
     
     print(f"Répertoire d'installation: {install_dir}")
+    print(f"Répertoire des modules: {modules_install_dir}")
     print(f"Répertoire des exécutables: {bin_dir}")
     print()
     
@@ -119,12 +132,13 @@ def install_toolbox():
         print(f"Scripts de lancement créés: {[str(l) for l in launchers]} ✓")
         
         # Installe les modules d'exemple
-        examples_dir = script_dir / "modules"
-        if examples_dir.exists():
-            for module_file in examples_dir.glob("*.py"):
-                dest = install_dir / "examples" / module_file.name
+        modules_dir = script_dir / "modules"
+        if modules_dir.exists():
+            for module_file in modules_dir.glob("*.py"):
+                dest = modules_install_dir / "modules" / module_file.name  
                 dest.parent.mkdir(exist_ok=True)
                 shutil.copy2(module_file, dest)
+                print("Module", module_file, "installé")
             print("Modules d'exemple installés ✓")
         
         print()
@@ -132,7 +146,7 @@ def install_toolbox():
         print()
         print("Pour utiliser Toolbox:")
         print("  toolbox list              # Liste les modules")
-        print("  toolbox run <module>      # Exécute un module")
+        print("  toolbox <module>          # Exécute un module")
         print("  toolbox install <file>    # Installe un nouveau module")
         print()
         
@@ -165,7 +179,7 @@ def uninstall_toolbox():
     """Désinstallation"""
     print("=== Désinstallation de Toolbox ===")
     
-    install_dir, bin_dir = get_install_paths()
+    install_dir, bin_dir, modules_install_dir = get_install_paths()
     
     try:
         # Supprime le répertoire d'installation

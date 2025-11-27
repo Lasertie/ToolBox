@@ -40,9 +40,9 @@ toolbox = "toolbox:main"
 mcli = "toolbox:main"
 
 [project.urls]
-Homepage = "https://github.com/username/toolbox"
-Repository = "https://github.com/username/toolbox"
-Issues = "https://github.com/username/toolbox/issues"
+Homepage = "https://github.com/lasertie/toolbox"
+Repository = "https://github.com/lasertie/toolbox"
+Issues = "https://github.com/lasertie/toolbox/issues"
 
 [tool.black]
 line-length = 88
@@ -51,3 +51,4 @@ target-version = ['py37']
 [tool.flake8]
 max-line-length = 88
 extend-ignore = ["E203", "W503"]
+    

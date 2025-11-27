@@ -51,6 +51,11 @@ class ToolboxManager:
                 modules.append(file_path.stem)
         return sorted(modules)
     
+    def module_exists(self, module_name: str) -> bool:
+        """Vérifie si un module existe"""
+        module_path = self.modules_dir / f"{module_name}.py"
+        return module_path.exists()
+    
     def load_module(self, module_name: str):
         """Charge un module spécifique"""
         module_path = self.modules_dir / f"{module_name}.py"
@@ -157,59 +162,181 @@ class ToolboxManager:
         except Exception as e:
             print(f"Erreur lors de la désinstallation: {e}")
             return 1
+    
+    def update_module(self, module_name: str, source_path: str = None):
+        """Met à jour un module existant"""
+        module_path = self.modules_dir / f"{module_name}.py"
+        
+        # Vérifie si le module existe
+        if not module_path.exists():
+            print(f"Erreur: Le module '{module_name}' n'est pas installé")
+            print(f"Utilisez 'toolbox install' pour installer un nouveau module")
+            return 1
+        
+        # Si aucun chemin source n'est fourni, utilise celui de la config
+        if not source_path:
+            config = self.load_config()
+            if module_name in config['modules'] and 'source' in config['modules'][module_name]:
+                source_path = config['modules'][module_name]['source']
+            else:
+                print(f"Erreur: Aucune source trouvée pour le module '{module_name}'")
+                print(f"Spécifiez le chemin du fichier source: toolbox update {module_name} <file>")
+                return 1
+        
+        source = Path(source_path)
+        if not source.exists():
+            print(f"Erreur: Le fichier source '{source_path}' n'existe pas")
+            return 1
+        
+        if source.suffix != '.py':
+            print("Erreur: Le fichier doit avoir l'extension .py")
+            return 1
+        
+        try:
+            # Sauvegarde l'ancienne version
+            backup_path = self.modules_dir / f"{module_name}.py.backup"
+            with open(module_path, 'r', encoding='utf-8') as f:
+                backup_content = f.read()
+            
+            with open(backup_path, 'w', encoding='utf-8') as f:
+                f.write(backup_content)
+            
+            # Copie la nouvelle version
+            with open(source, 'r', encoding='utf-8') as src, \
+                 open(module_path, 'w', encoding='utf-8') as dst:
+                dst.write(src.read())
+            
+            print(f"✓ Module '{module_name}' mis à jour avec succès")
+            print(f"  Backup sauvegardé: {backup_path}")
+            
+            # Met à jour la configuration
+            config = self.load_config()
+            if module_name not in config['modules']:
+                config['modules'][module_name] = {}
+            
+            config['modules'][module_name]['source'] = str(source)
+            config['modules'][module_name]['last_update'] = str(Path().cwd())
+            self.save_config(config)
+            
+            # Supprime le backup si tout s'est bien passé
+            try:
+                backup_path.unlink()
+            except:
+                pass
+            
+            return 0
+            
+        except Exception as e:
+            print(f"Erreur lors de la mise à jour: {e}")
+            
+            # Restaure le backup en cas d'erreur
+            if backup_path.exists():
+                try:
+                    with open(backup_path, 'r', encoding='utf-8') as backup, \
+                         open(module_path, 'w', encoding='utf-8') as module:
+                        module.write(backup.read())
+                    print("Module restauré depuis le backup")
+                except:
+                    print(f"ATTENTION: Impossible de restaurer le backup depuis {backup_path}")
+            
+            return 1
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Toolbox - Gestionnaire de modules Python",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-Exemples d'utilisation:
-  toolbox list                    # Liste tous les modules
-  toolbox run image_converter input.jpg output.png  # Exécute un module
-  toolbox install ./mon_module.py # Installe un nouveau module
-  toolbox uninstall image_converter # Désinstalle un module
-        """
-    )
-    
-    subparsers = parser.add_subparsers(dest='command', help='Commandes disponibles')
-    
-    # Commande list
-    subparsers.add_parser('list', help='Liste tous les modules disponibles')
-    
-    # Commande run
-    run_parser = subparsers.add_parser('run', help='Exécute un module')
-    run_parser.add_argument('module', help='Nom du module à exécuter')
-    run_parser.add_argument('args', nargs='*', help='Arguments pour le module')
-    
-    # Commande install
-    install_parser = subparsers.add_parser('install', help='Installe un nouveau module')
-    install_parser.add_argument('source', help='Chemin vers le fichier Python à installer')
-    
-    # Commande uninstall
-    uninstall_parser = subparsers.add_parser('uninstall', help='Désinstalle un module')
-    uninstall_parser.add_argument('module', help='Nom du module à désinstaller')
-    
-    args = parser.parse_args()
-    
-    if not args.command:
-        parser.print_help()
-        return 0
-    
     toolbox = ToolboxManager()
     
-    if args.command == 'list':
+    # Commandes internes de Toolbox
+    INTERNAL_COMMANDS = ['list', 'install', 'uninstall', 'update', 'help']
+    
+    if len(sys.argv) < 2:
+        print("Usage: toolbox <commande|module> [options]")
+        print("\nCommandes Toolbox:")
+        print("  list                    Liste tous les modules disponibles")
+        print("  install <file>          Installe un nouveau module")
+        print("  update <module> [file]  Met à jour un module existant")
+        print("  uninstall <module>      Désinstalle un module")
+        print("  help                    Affiche cette aide")
+        print("\nExécution de modules:")
+        print("  toolbox <module> [args...]  Exécute directement un module")
+        print("\nExemples:")
+        print("  toolbox list")
+        print("  toolbox qr 'https://example.com' -f output.png")
+        print("  toolbox install ./mon_module.py")
+        print("  toolbox update qr ./qr_v2.py")
+        return 0
+    
+    command = sys.argv[1]
+    
+    # Gestion des commandes internes
+    if command == 'list':
         toolbox.list_modules()
         return 0
     
-    elif args.command == 'run':
-        return toolbox.run_module(args.module, args.args)
+    elif command == 'help' or command == '--help' or command == '-h':
+        print("Toolbox - Gestionnaire de modules Python")
+        print("\nCommandes:")
+        print("  list                    Liste tous les modules disponibles")
+        print("  install <file>          Installe un nouveau module")
+        print("  update <module> [file]  Met à jour un module existant")
+        print("  uninstall <module>      Désinstalle un module")
+        print("  <module> [args...]      Exécute directement un module")
+        print("\nExemples:")
+        print("  toolbox list")
+        print("  toolbox qr 'Mon texte' -f qr.png")
+        print("  toolbox install ./nouveau_module.py")
+        print("  toolbox update qr ./qr_v2.py")
+        print("  toolbox update qr  # Utilise la source enregistrée")
+        print("  toolbox uninstall qr")
+        return 0
     
-    elif args.command == 'install':
-        return toolbox.install_module(args.source)
+    elif command == 'install':
+        if len(sys.argv) < 3:
+            print("Erreur: Spécifiez le chemin du fichier à installer")
+            print("Usage: toolbox install <file>")
+            return 1
+        
+        source_path = sys.argv[2]
+        return toolbox.install_module(source_path)
     
-    elif args.command == 'uninstall':
-        return toolbox.uninstall_module(args.module)
+    elif command == 'update':
+        if len(sys.argv) < 3:
+            print("Erreur: Spécifiez le nom du module à mettre à jour")
+            print("Usage: toolbox update <module> [file]")
+            return 1
+        
+        module_name = sys.argv[2]
+        source_path = sys.argv[3] if len(sys.argv) > 3 else None
+        return toolbox.update_module(module_name, source_path)
+    
+    elif command == 'uninstall':
+        if len(sys.argv) < 3:
+            print("Erreur: Spécifiez le nom du module à désinstaller")
+            print("Usage: toolbox uninstall <module>")
+            return 1
+        
+        module_name = sys.argv[2]
+        return toolbox.uninstall_module(module_name)
+    
+    # Si ce n'est pas une commande interne, considérer que c'est un module
+    else:
+        module_name = command
+        
+        # Vérifier si le module existe
+        if not toolbox.module_exists(module_name):
+            print(f"Erreur: Module ou commande '{module_name}' introuvable")
+            print(f"\nModules disponibles:")
+            modules = toolbox.discover_modules()
+            if modules:
+                for mod in modules:
+                    print(f"  - {mod}")
+            else:
+                print("  (aucun module installé)")
+            print(f"\nCommandes disponibles: {', '.join(INTERNAL_COMMANDS)}")
+            return 1
+        
+        # Exécuter le module avec tous les arguments restants
+        module_args = sys.argv[2:]
+        return toolbox.run_module(module_name, module_args)
 
 
 if __name__ == "__main__":
