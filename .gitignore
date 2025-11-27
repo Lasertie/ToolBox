@@ -5,3 +5,4 @@ modules/__pycache__/
 venv/
 __pycache__/imgconv.cpython-312.pyc
 __pycache__/
+toolbox.egg-info/
