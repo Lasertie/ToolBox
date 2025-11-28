@@ -231,19 +231,3 @@ Pour obtenir de l'aide :
 
 - Consultez cette documentation
 - Ouvrez une issue sur le dépôt du projet
-
----
-
-# requirements.txt
-
-```
-# Dépendances de base pour Toolbox
-# Aucune dépendance obligatoire pour le core
-
-# Dépendances optionnelles pour les modules d'exemple
-Pillow>=8.0.0          # Pour imgconv
-requests>=2.25.0       # Pour les modules web
-beautifulsoup4>=4.9.0  # Pour le parsing HTML
-PyPDF2>=2.0.0         # Pour la manipulation PDF
-python-magic>=0.4.0    # Détection de type MIME
-```
